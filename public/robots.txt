@@ -1,0 +1,9 @@
+# Robots.txt for GSJ Portfolio & Web Apps
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin-secret/
+
+# Google & Bing Sitemaps
+Sitemap: https://gsj.dev/sitemap.xml
+Sitemap: https://app.gsj.dev/sitemap.xml

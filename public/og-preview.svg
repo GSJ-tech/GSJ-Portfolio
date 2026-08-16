@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070a13" />
+      <stop offset="50%" stop-color="#0c1222" />
+      <stop offset="100%" stop-color="#080d1a" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(30, 41, 59, 0.7)" />
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.85)" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="60" result="blur" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Ambient Glows -->
+  <circle cx="1000" cy="150" r="280" fill="#0284c7" opacity="0.18" filter="url(#glow)" />
+  <circle cx="200" cy="500" r="260" fill="#059669" opacity="0.15" filter="url(#glow)" />
+
+  <!-- Grid Pattern Overlay -->
+  <g stroke="rgba(255, 255, 255, 0.04)" stroke-width="1">
+    <line x1="0" y1="100" x2="1200" y2="100" />
+    <line x1="0" y1="200" x2="1200" y2="200" />
+    <line x1="0" y1="300" x2="1200" y2="300" />
+    <line x1="0" y1="400" x2="1200" y2="400" />
+    <line x1="0" y1="500" x2="1200" y2="500" />
+    <line x1="200" y1="0" x2="200" y2="630" />
+    <line x1="400" y1="0" x2="400" y2="630" />
+    <line x1="600" y1="0" x2="600" y2="630" />
+    <line x1="800" y1="0" x2="800" y2="630" />
+    <line x1="1000" y1="0" x2="1000" y2="630" />
+  </g>
+
+  <!-- Brand Badge & Avatar Icon -->
+  <g transform="translate(80, 80)">
+    <rect width="70" height="70" rx="20" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+    <text x="35" y="44" font-family="'Space Grotesk', -apple-system, sans-serif" font-size="28" font-weight="900" fill="#38bdf8" text-anchor="middle">GSJ</text>
+    
+    <rect x="85" y="16" width="220" height="38" rx="19" fill="rgba(56, 189, 248, 0.12)" stroke="rgba(56, 189, 248, 0.3)" />
+    <circle cx="103" cy="35" r="5" fill="#34d399" />
+    <text x="118" y="41" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#38bdf8">AVAILABLE FOR WORK</text>
+  </g>
+
+  <!-- Main Headline -->
+  <text x="80" y="235" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="54" font-weight="800" fill="#ffffff" letter-spacing="-1">
+    Full-Stack Web Developer
+  </text>
+  <text x="80" y="300" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="54" font-weight="800" fill="url(#cyanGrad)" letter-spacing="-1">
+    &amp; Digital Product Builder
+  </text>
+
+  <!-- Tagline / Subtitle -->
+  <text x="80" y="365" font-family="-apple-system, sans-serif" font-size="22" fill="#94a3b8" font-weight="400">
+    Crafting high-converting web applications, startup MVPs &amp; performance platforms.
+  </text>
+
+  <!-- Feature Highlights Pills -->
+  <g transform="translate(80, 415)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="210" height="46" rx="12" fill="url(#cardBg)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+    <text x="20" y="28" font-family="-apple-system, sans-serif" font-size="15" font-weight="600" fill="#e2e8f0">⚡ 3 Live Demos Ready</text>
+
+    <!-- Pill 2 -->
+    <rect x="225" y="0" width="220" height="46" rx="12" fill="url(#cardBg)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+    <text x="245" y="28" font-family="-apple-system, sans-serif" font-size="15" font-weight="600" fill="#e2e8f0">🛠️ Admin Command Center</text>
+
+    <!-- Pill 3 -->
+    <rect x="460" y="0" width="200" height="46" rx="12" fill="url(#cardBg)" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+    <text x="480" y="28" font-family="-apple-system, sans-serif" font-size="15" font-weight="600" fill="#34d399">📱 WhatsApp &amp; Call Ready</text>
+  </g>
+
+  <!-- Bottom Contact Bar -->
+  <g transform="translate(80, 520)">
+    <rect x="0" y="0" width="1040" height="56" rx="16" fill="rgba(15, 23, 42, 0.95)" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1.5" />
+    
+    <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="600" fill="#38bdf8">📞 +91 86999 79370</text>
+    <text x="280" y="34" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="600" fill="#cbd5e1">✉️ gurmanassingh148@gmail.com</text>
+    <text x="760" y="34" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="700" fill="#34d399">🌐 gsj.dev • app.gsj.dev</text>
+  </g>
+
+  <!-- Right Visual Preview Mockup Box -->
+  <g transform="translate(770, 110)">
+    <rect width="350" height="360" rx="20" fill="url(#cardBg)" stroke="rgba(56, 189, 248, 0.3)" stroke-width="1.5" />
+    <!-- Mini window dots -->
+    <circle cx="25" cy="25" r="5" fill="#ef4444" />
+    <circle cx="42" cy="25" r="5" fill="#f59e0b" />
+    <circle cx="59" cy="25" r="5" fill="#10b981" />
+    
+    <!-- Code Preview inside box -->
+    <text x="25" y="70" font-family="'JetBrains Mono', monospace" font-size="13" fill="#64748b">// GSJ Developer Profile</text>
+    <text x="25" y="98" font-family="'JetBrains Mono', monospace" font-size="13" fill="#38bdf8">const</text>
+    <text x="72" y="98" font-family="'JetBrains Mono', monospace" font-size="13" fill="#ffffff">developer = {</text>
+    <text x="45" y="126" font-family="'JetBrains Mono', monospace" font-size="13" fill="#cbd5e1">name: <tspan fill="#34d399">'GSJ'</tspan>,</text>
+    <text x="45" y="154" font-family="'JetBrains Mono', monospace" font-size="13" fill="#cbd5e1">role: <tspan fill="#34d399">'Full-Stack Web Dev'</tspan>,</text>
+    <text x="45" y="182" font-family="'JetBrains Mono', monospace" font-size="13" fill="#cbd5e1">speed: <tspan fill="#f59e0b">'100/100 Lighthouse'</tspan>,</text>
+    <text x="45" y="210" font-family="'JetBrains Mono', monospace" font-size="13" fill="#cbd5e1">status: <tspan fill="#38bdf8">'Open for Contracts'</tspan></text>
+    <text x="25" y="238" font-family="'JetBrains Mono', monospace" font-size="13" fill="#ffffff">};</text>
+
+    <!-- Interactive Badges inside Mockup -->
+    <rect x="25" y="270" width="140" height="34" rx="8" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" />
+    <text x="37" y="292" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#38bdf8">React • TypeScript</text>
+    
+    <rect x="180" y="270" width="145" height="34" rx="8" fill="rgba(52, 211, 153, 0.15)" stroke="#34d399" />
+    <text x="192" y="292" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#34d399">Tailwind • Firebase</text>
+  </g>
+</svg>

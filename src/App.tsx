@@ -40,6 +40,9 @@ import {
 import { Project, InquiryMessage, INITIAL_PROJECTS } from './types';
 import { ProjectModal } from './components/ProjectModal';
 import { AdminDashboard } from './components/AdminDashboard';
+import { OnboardingChecklist } from './components/OnboardingChecklist';
+import { CookieBanner } from './components/CookieBanner';
+import { trackEvent } from './utils/analytics';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'all' | 'web' | 'games'>('all');
@@ -113,6 +116,10 @@ export default function App() {
   const whatsappUrl = `https://wa.me/918699979370?text=${encodeURIComponent("Hi GSJ, I reviewed your portfolio and would like to discuss a web development project!")}`;
 
   useEffect(() => {
+    trackEvent('pageview', 'home_landing');
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('gsj_projects_v2', JSON.stringify(projectsList));
   }, [projectsList]);
 
@@ -123,13 +130,28 @@ export default function App() {
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(myEmail);
     setCopiedEmail(true);
+    trackEvent('pageview', 'copied_email', 'contact');
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
   const handleCopyPhone = () => {
     navigator.clipboard.writeText(myPhone);
     setCopiedPhone(true);
+    trackEvent('call_click', 'copied_phone', 'contact');
     setTimeout(() => setCopiedPhone(false), 2000);
+  };
+
+  const handleOpenWhatsApp = (source: string) => {
+    trackEvent('whatsapp_click', source, 'conversion');
+  };
+
+  const handleOpenCall = (source: string) => {
+    trackEvent('call_click', source, 'conversion');
+  };
+
+  const handleOpenDemoModal = (project: Project) => {
+    trackEvent('demo_open', project.title, 'portfolio');
+    setSelectedModalProject(project);
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -149,6 +171,7 @@ export default function App() {
 
     setInquiries(prev => [newInq, ...prev]);
     setFormSubmitted(true);
+    trackEvent('contact_submit', formData.service, 'leads', { timeline: formData.timeline });
   };
 
   const toggleInquiryRead = (id: string) => {
@@ -358,10 +381,14 @@ export default function App() {
           </a>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
             <a href="#about" className="hover:text-cyan-400 transition-colors">About</a>
             <a href="#skills" className="hover:text-cyan-400 transition-colors">Skills</a>
             <a href="#projects" className="hover:text-cyan-400 transition-colors">Projects</a>
+            <a href="#onboarding" className="hover:text-cyan-400 transition-colors flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Onboarding</span>
+            </a>
             <a href="#timelines" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
               Timelines
@@ -374,6 +401,7 @@ export default function App() {
           <div className="hidden sm:flex items-center gap-3">
             <a
               href={whatsappUrl}
+              onClick={() => handleOpenWhatsApp('header_nav')}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-400 hover:text-emerald-300 transition-all flex items-center gap-1.5 text-xs font-mono-code"
@@ -385,6 +413,7 @@ export default function App() {
 
             <a
               href={`tel:${myPhone.replace(/\s+/g, '')}`}
+              onClick={() => handleOpenCall('header_nav')}
               className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 transition-all flex items-center gap-1.5 text-xs font-mono-code"
               title="Direct Call (+91 8699979370)"
             >
@@ -856,7 +885,7 @@ export default function App() {
                           const el = document.getElementById('game-section');
                           if (el) el.scrollIntoView({ behavior: 'smooth' });
                         } else {
-                          setSelectedModalProject(project);
+                          handleOpenDemoModal(project);
                         }
                       }}
                       className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 transition-all flex items-center justify-center gap-1.5"
@@ -882,6 +911,20 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* ============================================================ */}
+        {/* INTERACTIVE ONBOARDING CHECKLIST SECTION */}
+        {/* ============================================================ */}
+        <OnboardingChecklist
+          onOpenDemo={(target) => {
+            const match = projectsList.find(p => p.id === target || p.category.toLowerCase().includes(target));
+            if (match) handleOpenDemoModal(match);
+          }}
+          onNavigateSection={(id) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
 
         {/* ============================================================ */}
         {/* PROJECT DEVELOPMENT TIMELINES SECTION */}
@@ -1358,10 +1401,18 @@ export default function App() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-xs">
-            <div>
-              <span>© 2026 GSJ. All rights reserved. • Built for speed, responsiveness & conversions.</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span>© 2026 GSJ. All rights reserved. • Built for speed &amp; conversions.</span>
+              <span className="text-slate-700">|</span>
+              <span className="text-slate-400 font-mono-code">Main: gsj.dev • App: app.gsj.dev</span>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('gsj_open_cookie_preferences'))}
+                className="text-slate-400 hover:text-cyan-400 font-mono-code transition-colors"
+              >
+                Cookie Preferences
+              </button>
               <button
                 onClick={() => setIsAdminOpen(true)}
                 className="text-slate-400 hover:text-cyan-400 flex items-center gap-1 font-mono-code transition-colors"
@@ -1378,6 +1429,7 @@ export default function App() {
       <aside aria-label="Quick contact" className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5">
         <a
           href={whatsappUrl}
+          onClick={() => handleOpenWhatsApp('floating_widget')}
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xl shadow-emerald-600/30 transition-all hover:scale-105"
@@ -1387,6 +1439,9 @@ export default function App() {
           <span className="hidden sm:inline font-mono-code">Chat on WhatsApp</span>
         </a>
       </aside>
+
+      {/* Privacy & Cookie Consent Banner */}
+      <CookieBanner />
 
       {/* Interactive Project Modal Preview */}
       {selectedModalProject && (
