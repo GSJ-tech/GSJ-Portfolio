@@ -1,8 +1,84 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
+# Logs & Diagnostics
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+
+# OS and Editor Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# ❌ STRICT SECURITY EXCLUSIONS (Never commit secrets or sensitive data)
+# Environment Variables & API Keys
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
+
+# ❌ Private Keys, Certificates & Service Accounts
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.keystore
+service-account*.json
+serviceAccountKey.json
+google-services.json
+firebase-adminsdk*.json
+credentials.json
+client_secret*.json
+
+# ❌ Passwords & Account Lists
+password*.txt
+passwords*.txt
+account*.txt
+accounts*.txt
+secret*.txt
+secrets*.txt
+*.kdbx
+
+# ❌ Database Dumps & Backups
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+database.sql
+dump.sql
+users.json
+backup*.zip
+backup*.tar.gz
+*.bak
+
+# ❌ Personal Documents & Identity Scans
+*aadhaar*
+*pan_card*
+*passport*
+*driving_license*
+*.pdf
