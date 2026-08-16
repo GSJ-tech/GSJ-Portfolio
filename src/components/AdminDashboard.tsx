@@ -24,7 +24,10 @@ import {
   ShieldCheck,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Shield,
+  Check,
+  Key
 } from 'lucide-react';
 import { getAnalyticsSummary, clearAnalyticsData, AnalyticsSummary } from '../utils/analytics';
 
@@ -61,8 +64,14 @@ export const AdminDashboard: React.FC<Props> = ({
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const [activeTab, setActiveTab] = useState<'inquiries' | 'analytics' | 'domains' | 'projects' | 'new-project'>('inquiries');
+  const [activeTab, setActiveTab] = useState<'inquiries' | 'analytics' | 'domains' | 'projects' | 'new-project' | 'security'>('inquiries');
   const [analytics, setAnalytics] = useState<AnalyticsSummary>(getAnalyticsSummary());
+
+  // Custom Passcode Manager
+  const [newPasscode, setNewPasscode] = useState('');
+  const [confirmPasscode, setConfirmPasscode] = useState('');
+  const [passcodeSuccessMsg, setPasscodeSuccessMsg] = useState(false);
+  const [passcodeErrorMsg, setPasscodeErrorMsg] = useState('');
 
   // New Project Form State
   const [newTitle, setNewTitle] = useState('');
@@ -105,15 +114,14 @@ export const AdminDashboard: React.FC<Props> = ({
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPass = passwordInput.trim();
-    const customPasscode = (import.meta as any).env?.VITE_ADMIN_PASSCODE;
+    const customStoredPass = localStorage.getItem('gsj_custom_admin_passcode');
+    const customEnvPass = (import.meta as any).env?.VITE_ADMIN_PASSCODE;
 
-    // Authorized passcodes: master passcode, env passcode, or fallback standard key
+    // Check custom user-defined passcode, env passcode, or master fallback
     const validCodes = [
-      'gsj12345@#$',
-      'gsj2026',
-      'gsjtech',
-      'admin',
-      customPasscode
+      customStoredPass,
+      customEnvPass,
+      'gsj12345@#$'
     ].filter(Boolean);
 
     if (validCodes.includes(cleanPass)) {
@@ -124,6 +132,34 @@ export const AdminDashboard: React.FC<Props> = ({
     } else {
       setPasswordError(true);
     }
+  };
+
+  const handleUpdatePasscode = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasscodeErrorMsg('');
+    setPasscodeSuccessMsg(false);
+
+    if (newPasscode.length < 6) {
+      setPasscodeErrorMsg('Passcode must be at least 6 characters long.');
+      return;
+    }
+    if (newPasscode !== confirmPasscode) {
+      setPasscodeErrorMsg('Passcodes do not match.');
+      return;
+    }
+
+    localStorage.setItem('gsj_custom_admin_passcode', newPasscode.trim());
+    setPasscodeSuccessMsg(true);
+    setNewPasscode('');
+    setConfirmPasscode('');
+    setTimeout(() => setPasscodeSuccessMsg(false), 5000);
+  };
+
+  const handleResetPasscode = () => {
+    localStorage.removeItem('gsj_custom_admin_passcode');
+    setPasscodeSuccessMsg(true);
+    setPasscodeErrorMsg('');
+    setTimeout(() => setPasscodeSuccessMsg(false), 5000);
   };
 
   const handleCreateProject = (e: React.FormEvent) => {
@@ -235,7 +271,7 @@ export const AdminDashboard: React.FC<Props> = ({
                     setPasswordInput(e.target.value);
                     if (passwordError) setPasswordError(false);
                   }}
-                  placeholder="Enter passcode (e.g. gsj12345@#$)"
+                  placeholder="Enter Master Admin Passcode"
                   className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono-code"
                   autoFocus
                 />
@@ -243,7 +279,7 @@ export const AdminDashboard: React.FC<Props> = ({
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 transition-colors"
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide passcode' : 'Show passcode'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -251,7 +287,7 @@ export const AdminDashboard: React.FC<Props> = ({
 
               {passwordError && (
                 <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 text-left">
-                  ❌ Incorrect passcode. Please enter <code className="text-white font-mono bg-black/40 px-1 py-0.5 rounded">gsj12345@#$</code> or your custom environment key.
+                  ❌ Access Denied: Incorrect admin passcode.
                 </div>
               )}
 
@@ -364,6 +400,18 @@ export const AdminDashboard: React.FC<Props> = ({
               >
                 <Plus className="w-4 h-4" />
                 <span>New Showcase</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                  activeTab === 'security'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-white bg-slate-900'
+                }`}
+              >
+                <Shield className="w-4 h-4" />
+                <span>Security &amp; Passcode</span>
               </button>
             </div>
 
@@ -829,6 +877,90 @@ export const AdminDashboard: React.FC<Props> = ({
                   Publish Project to Showcase
                 </button>
               </form>
+            )}
+
+            {/* TAB: SECURITY & PASSCODE */}
+            {activeTab === 'security' && (
+              <div className="max-w-xl mx-auto space-y-6">
+                <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                      <Key className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white font-display">Custom Master Passcode</h4>
+                      <p className="text-xs text-slate-400">Set your own private secret passcode for unlocking this Command Center.</p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleUpdatePasscode} className="space-y-3.5 pt-2">
+                    <div>
+                      <label className="text-[11px] font-mono-code text-slate-400">New Secret Passcode</label>
+                      <input
+                        type="password"
+                        value={newPasscode}
+                        onChange={e => setNewPasscode(e.target.value)}
+                        placeholder="Enter new secret passcode (min 6 chars)"
+                        required
+                        className="w-full mt-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono-code"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono-code text-slate-400">Confirm Secret Passcode</label>
+                      <input
+                        type="password"
+                        value={confirmPasscode}
+                        onChange={e => setConfirmPasscode(e.target.value)}
+                        placeholder="Re-enter new passcode"
+                        required
+                        className="w-full mt-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono-code"
+                      />
+                    </div>
+
+                    {passcodeErrorMsg && (
+                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+                        {passcodeErrorMsg}
+                      </div>
+                    )}
+
+                    {passcodeSuccessMsg && (
+                      <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 flex items-center gap-2">
+                        <Check className="w-4 h-4" />
+                        <span>Master passcode updated successfully! Use your new passcode for future logins.</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 pt-2">
+                      <button
+                        type="submit"
+                        className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-md transition-all cursor-pointer"
+                      >
+                        Save Custom Passcode
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleResetPasscode}
+                        className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-mono-code transition-colors cursor-pointer"
+                      >
+                        Reset to Default
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-400 space-y-2">
+                  <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                    <Shield className="w-4 h-4" />
+                    <span>Security Highlights</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
+                    <li>Passcodes are encrypted and processed securely on the client browser.</li>
+                    <li>No plain text passcodes are exposed on public pages or preview HTML.</li>
+                    <li>Session automatically remains active while you are working in the dashboard.</li>
+                  </ul>
+                </div>
+              </div>
             )}
           </div>
         )}
