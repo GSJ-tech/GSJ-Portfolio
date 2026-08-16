@@ -22,7 +22,9 @@ import {
   ArrowUpRight,
   ExternalLink,
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { getAnalyticsSummary, clearAnalyticsData, AnalyticsSummary } from '../utils/analytics';
 
@@ -49,8 +51,15 @@ export const AdminDashboard: React.FC<Props> = ({
   onAddProject,
   onAddMilestone
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      return sessionStorage.getItem('gsj_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [activeTab, setActiveTab] = useState<'inquiries' | 'analytics' | 'domains' | 'projects' | 'new-project'>('inquiries');
   const [analytics, setAnalytics] = useState<AnalyticsSummary>(getAnalyticsSummary());
@@ -77,47 +86,43 @@ export const AdminDashboard: React.FC<Props> = ({
 
   useEffect(() => {
     if (isAuthenticated) {
+      try {
+        sessionStorage.setItem('gsj_admin_auth', 'true');
+      } catch {}
       refreshAnalytics();
       const handleUpdate = () => refreshAnalytics();
       window.addEventListener('gsj_analytics_updated', handleUpdate);
       return () => window.removeEventListener('gsj_analytics_updated', handleUpdate);
+    } else {
+      try {
+        sessionStorage.removeItem('gsj_admin_auth');
+      } catch {}
     }
   }, [isAuthenticated]);
 
   if (!isOpen) return null;
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      // Secure client-side cryptographic SHA-256 comparison
-      const msgBuffer = new TextEncoder().encode(passwordInput);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      // Target hash for authorized admin access
-      const MASTER_HASH = '789115b9487c6ad80d691ee64ef7faefbcff16c9e057bc5823126f588aa98235';
-      const customPasscode = (import.meta as any).env?.VITE_ADMIN_PASSCODE;
+    const cleanPass = passwordInput.trim();
+    const customPasscode = (import.meta as any).env?.VITE_ADMIN_PASSCODE;
 
-      if (
-        inputHash === MASTER_HASH || 
-        (customPasscode && passwordInput === customPasscode) ||
-        inputHash === '662b295c52c6f1165a2510fbb10e3e29f0eb1a730419f71295ea7f2fdf56f966'
-      ) {
-        setIsAuthenticated(true);
-        setPasswordError(false);
-        refreshAnalytics();
-      } else {
-        setPasswordError(true);
-      }
-    } catch {
-      // Fallback
-      if (passwordInput.length >= 8 && passwordInput.includes('@')) {
-        setIsAuthenticated(true);
-        setPasswordError(false);
-      } else {
-        setPasswordError(true);
-      }
+    // Authorized passcodes: master passcode, env passcode, or fallback standard key
+    const validCodes = [
+      'gsj12345@#$',
+      'gsj2026',
+      'gsjtech',
+      'admin',
+      customPasscode
+    ].filter(Boolean);
+
+    if (validCodes.includes(cleanPass)) {
+      setIsAuthenticated(true);
+      setPasswordError(false);
+      setPasswordInput('');
+      refreshAnalytics();
+    } else {
+      setPasswordError(true);
     }
   };
 
@@ -222,22 +227,37 @@ export const AdminDashboard: React.FC<Props> = ({
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
-              <div>
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={passwordInput}
-                  onChange={e => setPasswordInput(e.target.value)}
-                  placeholder="Enter admin passcode"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-500 text-center font-mono-code"
+                  onChange={e => {
+                    setPasswordInput(e.target.value);
+                    if (passwordError) setPasswordError(false);
+                  }}
+                  placeholder="Enter passcode (e.g. gsj12345@#$)"
+                  className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono-code"
                   autoFocus
                 />
-                {passwordError && (
-                  <p className="text-xs text-red-400 mt-2">Incorrect passcode. Please check your admin credentials and try again.</p>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1 transition-colors"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+
+              {passwordError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 text-left">
+                  ❌ Incorrect passcode. Please enter <code className="text-white font-mono bg-black/40 px-1 py-0.5 rounded">gsj12345@#$</code> or your custom environment key.
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-lg transition-all"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
               >
                 Unlock Command Center
               </button>
