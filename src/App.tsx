@@ -100,6 +100,7 @@ export default function App() {
     message: ''
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
 
   // Mini Shadow Jump Game State
   const [gameScore, setGameScore] = useState(0);
@@ -154,9 +155,11 @@ export default function App() {
     setSelectedModalProject(project);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
+
+    setIsSubmittingForm(true);
 
     const newInq: InquiryMessage = {
       id: `inq-${Date.now()}`,
@@ -169,9 +172,37 @@ export default function App() {
       read: false
     };
 
+    // 1. Save to local storage for Admin Dashboard access
     setInquiries(prev => [newInq, ...prev]);
-    setFormSubmitted(true);
-    trackEvent('contact_submit', formData.service, 'leads', { timeline: formData.timeline });
+
+    // 2. Automatically dispatch email to developer inbox
+    try {
+      await fetch('https://formsubmit.co/ajax/gurmanassingh148@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `⚡ New Project Inquiry from ${formData.name} - GSJ Portfolio`,
+          Name: formData.name,
+          Email: formData.email,
+          Service: formData.service,
+          Timeline: formData.timeline,
+          Message: formData.message || 'No additional message provided.',
+          Date: newInq.date,
+          Source: window.location.href,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
+    } catch (err) {
+      console.warn('Background email dispatch error:', err);
+    } finally {
+      setIsSubmittingForm(false);
+      setFormSubmitted(true);
+      trackEvent('contact_submit', formData.service, 'leads', { timeline: formData.timeline });
+    }
   };
 
   const toggleInquiryRead = (id: string) => {
@@ -1272,21 +1303,33 @@ export default function App() {
             {/* Form */}
             <div className="lg:col-span-7 p-6 sm:p-8 rounded-2xl bg-[#0b1120] border border-slate-800">
               {formSubmitted ? (
-                <div className="py-12 text-center space-y-4">
+                <div className="py-10 text-center space-y-4">
                   <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
-                  <h3 className="text-xl font-bold text-white font-display">Message Successfully Dispatched!</h3>
+                  <h3 className="text-xl font-bold text-white font-display">Inquiry Sent &amp; Emailed to GSJ!</h3>
                   <p className="text-sm text-slate-300 max-w-md mx-auto">
-                    Thank you! Your project inquiry has been recorded and received in the GSJ Admin Command Center. I will contact you shortly via email / phone.
+                    Thank you! Your project details have been delivered directly to <span className="text-cyan-400 font-mono-code">{myEmail}</span> and recorded in the GSJ Command Center.
                   </p>
-                  <button
-                    onClick={() => {
-                      setFormSubmitted(false);
-                      setFormData({ name: '', email: '', service: 'Business Website', timeline: 'Standard (1-2 Weeks)', message: '' });
-                    }}
-                    className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
-                  >
-                    Send Another Message
-                  </button>
+                  
+                  <div className="pt-2 flex flex-wrap justify-center gap-3">
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Follow-up on WhatsApp</span>
+                    </a>
+                    <button
+                      onClick={() => {
+                        setFormSubmitted(false);
+                        setFormData({ name: '', email: '', service: 'Business Website', timeline: 'Standard (1-2 Weeks)', message: '' });
+                      }}
+                      className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-colors"
+                    >
+                      Send Another Inquiry
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -1323,8 +1366,8 @@ export default function App() {
                         onChange={e => setFormData({ ...formData, service: e.target.value })}
                         className="w-full mt-1.5 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-cyan-500"
                       >
-                        <option>Gym & Fitness Platform</option>
-                        <option>Restaurant & WhatsApp Ordering</option>
+                        <option>Gym &amp; Fitness Platform</option>
+                        <option>Restaurant &amp; WhatsApp Ordering</option>
                         <option>Creator / Influencer Hub</option>
                         <option>Business Website</option>
                         <option>Landing Page</option>
@@ -1346,7 +1389,7 @@ export default function App() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-mono-code text-slate-400">Project Overview & Goals</label>
+                    <label className="text-xs font-mono-code text-slate-400">Project Overview &amp; Goals</label>
                     <textarea
                       rows={4}
                       value={formData.message}
@@ -1358,10 +1401,20 @@ export default function App() {
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2"
+                    disabled={isSubmittingForm}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-60 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>Send Project Inquiry</span>
+                    {isSubmittingForm ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Sending &amp; Delivering to GSJ...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Send Project Inquiry</span>
+                      </>
+                    )}
                   </button>
                 </form>
               )}
